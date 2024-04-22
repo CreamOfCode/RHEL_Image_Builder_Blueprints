@@ -1,0 +1,136 @@
+name = "CUSTOM_RHEL8_BLUEPRINT"
+description = "RHEL8"
+version = "1.1.0"
+modules = []
+groups = []
+distro = "rhel-89"
+
+[[packages]]
+name = "vim-enhanced"
+version = "*"
+
+[[packages]]
+name = "tmux"
+version = "*"
+
+[[packages]]
+name = "firewalld"
+version = "*"
+
+[customizations]
+# hostname = ""
+## OpenSCAP requires 'openscap-scanner' and 'scap-security-guide' to be installed on build host
+## If the distro of image matches distro of build host, then you can use "/usr/share/xml/scap/ssg/content/ssg-rhel<VERSION_NUMBER>-ds.xml"
+## If distro of image is RHEL8, you can also download from: 'https://raw.githubusercontent.com/RedHatGov/rhel8-stig-latest/master/ssg-rhel8-ds.xml'
+
+[customizations.openscap]
+datastream = "/usr/share/xml/scap/ssg/content/ssg-rhel8-ds.xml"
+profile_id = "stig"
+
+[customizations.kernel]
+append = "fips=1 audit=1 ipv6.disable=1"
+
+[customizations.timezone]
+timezone = "US/Eastern"
+ntpservers = ["0.north-america.pool.ntp.org", "1.north-america.pool.ntp.org", "2.north-america.pool.ntp.org", "3.north-america.pool.ntp.org"]
+
+[customizations.locale]
+languages = ["en_US.UTF-8"]
+keyboard = "us"
+
+[customizations.firewall]
+# Palword uses 8211:udp
+ports = ["22:tcp", "8211:udp"]
+
+[customizations.firewall.services]
+enabled = []
+disabled = ["cockpit", "dhcpv6-client"]
+
+
+[customizations.services]
+enabled = ["sshd"]
+disabled = ["cockpit.socket", "httpd", "telnetd"]
+
+[[customizations.files]]
+path = "/etc/tmux.conf"
+data = "set -g lock-after-time 900\nset -g lock-command vlock\nsetw -g mode-keys vi\nset -g prefix C-a\nunbind-key C-b\nbind-key C-a send-prefix\n"
+mode = "0644"
+user = "root"
+group = "root"
+
+##############################################################
+
+[[customizations.filesystem]]
+mountpoint = "/"
+size = "40 GiB"
+
+[[customizations.filesystem]]
+mountpoint = "/boot"
+size = "1 GiB"
+
+[[customizations.filesystem]]
+mountpoint = "/home"
+size = "30 GiB"
+
+[[customizations.filesystem]]
+mountpoint = "/var"
+size = "40 GiB"
+
+[[customizations.filesystem]]
+mountpoint = "/var/log"
+size = "15 GiB"
+
+[[customizations.filesystem]]
+mountpoint = "/var/log/audit"
+size = "10 GiB"
+
+[[customizations.filesystem]]
+mountpoint = "/var/tmp"
+size = "10 GiB"
+
+[[customizations.filesystem]]
+mountpoint = "/usr"
+size = "30 GiB"
+
+[[customizations.filesystem]]
+mountpoint = "/tmp"
+size = "10 GiB"
+
+[[customizations.filesystem]]
+mountpoint = "/opt"
+size = "15 GiB"
+
+##############################################################
+
+[[customizations.group]]
+name = "admin"
+gid = 1000
+
+[[customizations.group]]
+name = "palworld"
+gid = 1001
+
+
+# Generate a Password Hash with: python3 -c 'import crypt,getpass;pw=getpass.getpass();print(crypt.crypt(pw) if (pw==getpass.getpass("Confirm: ")) else exit())'
+[[customizations.user]]
+name = "admin"
+description = "Server Administrator"
+password = "$6$hzQVX2dthut4NZjd$L6QFQHqlvL4mPvs.7.MGY/s4yJ7g0.BjaylYYs5pRRUmO8ghG6DXnENzwZcwRdrfSNPfmH/Q8R7kQ0LA6hvn30"
+key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDpChVKtGn2qI3o4CpjIg+65NuiZ7bX6qnYt+WjuGOmGIOdgXoJGJEFZ2btUDUSaUW9OnjM1AhUk/EuoD4I8ii1kXqEK/NQQmv6+Fpyw0UltfR1Vrnj8tR4z7S7oQBfNjmlVbJbbPQLsDka06tG9MmT1kKIDkWueO214O9/ZIHpeXgbtWn3tcx+OQ4Lzl6C3He4BMEI4QL45u31QR9qe+NXgEMPWNO/e7H30TNPqLr7gDwpxocwRzV2MWH0mAM7Ecm61Iquao6H/nYGDwIHgdjeJAJ8uMz13VsxDJdJsu/2Qj9xoCk/VI52cevZHgMYT1zt/pL6vCjK5sjRUfM+TJDEBgHLiqx/ZB6QW3/APFlyGBWSOGNiK/F+YFSsg5axyBWo2s0HdkSL2IYN0e22MJ1c0E4XncNIdyvUrx9XWuoKEQcmyAm3c5xzOzdXsUKmpBAX8h8M1uf6OnaeSYazlzTdYr5WqlB6NkoGrMwrrsYjuZTUZ/pXlK18Pg9w21GkgndOeH+qUKA6BgnxuHaeLOhsGBDvEDaoB/rvJrNDXWkq5796x1gUTQCozdQhYyUuMC/80/CzM2dMkstN1HGCuvJ0VY1A/fRW0SA34AiPegczXwHdoDuTa6RGXLe3/OA5ivLdxEQyHnuX7yfovP9hpzQW0YzHOuyrBm5kwjQtcICGiw=="
+home = "/home/admin"
+shell = "/usr/bin/bash"
+groups = ["wheel"]
+uid = 1000
+gid = 1000
+
+
+[[customizations.user]]
+name = "palworld"
+description = "Dedicated Palworld Server User"
+#password = "PASSWORD_HASH"
+#key = "SSH_PUBLIC_KEY"
+home = "/home/palworld"
+shell = "/usr/bin/bash"
+groups = ["palworld"]
+uid = 1001
+gid = 1001

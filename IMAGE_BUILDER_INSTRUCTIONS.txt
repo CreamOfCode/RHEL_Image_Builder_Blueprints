@@ -1,0 +1,304 @@
+### IMAGE BUILDER DOCUMENTATION ###
+# Reference:  https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html-single/composing_a_customized_rhel_system_image/index#doc-wrapper
+
+###############################################################
+### PREREQUISITES ###
+
+```
+sudo dnf install weldr-client -y
+sudo dnf install osbuild-composer -y
+## (Only if want to use Web UI Image Builder) sudo dnf install cockpit-composer -y
+sudo systemctl start osbuild-composer.socket
+sudo systemctl status osbuild-composer.socket
+sudo usermod -aG weldr $USER
+newgrp weldr
+composer-cli compose types
+```
+
+##############################################################
+### REPOSITORIES ####
+
+# List Repos with:
+## (Default) has: appstream, baseos
+```
+composer-cli sources list
+```
+
+
+# Add Custom Repos by
+## 1) Creating a <REPO_NAME>_repo.toml file
+```
+id = "k8s"
+name = "Kubernetes"
+type = "yum-baseurl"
+url = "https://server.example.com/repos/company_internal_packages/"
+check_gpg = false
+check_ssl = false
+system = false
+```
+## 2) Run command
+```
+composer-cli sources add <REPO_NAME>_repo.toml
+composer-cli sources list
+```
+
+
+#) Get info about repo
+```
+composer-cli sources info <source_id>
+```
+
+# appstream repo's Info
+```
+check_gpg = true
+check_repogpg = false
+check_ssl = true
+gpgkeys = ["-----BEGIN PGP PUBLIC KEY BLOCK-----\n\nmQINBErgSTsBEACh2A4b0O9t+vzC9VrVtL1AKvUWi9OPCjkvR7Xd8DtJxeeMZ5eF\n0HtzIG58qDRybwUe89FZprB1ffuUKzdE+HcL3FbNWSSOXVjZIersdXyH3NvnLLLF\n0DNRB2ix3bXG9Rh/RXpFsNxDp2CEMdUvbYCzE79K1EnUTVh1L0Of023FtPSZXX0c\nu7Pb5DI5lX5YeoXO6RoodrIGYJsVBQWnrWw4xNTconUfNPk0EGZtEnzvH2zyPoJh\nXGF+Ncu9XwbalnYde10OCvSWAZ5zTCpoLMTvQjWpbCdWXJzCm6G+/hx9upke546H\n5IjtYm4dTIVTnc3wvDiODgBKRzOl9rEOCIgOuGtDxRxcQkjrC+xvg5Vkqn7vBUyW\n9pHedOU+PoF3DGOM+dqv+eNKBvh9YF9ugFAQBkcG7viZgvGEMGGUpzNgN7XnS1gj\n/DPo9mZESOYnKceve2tIC87p2hqjrxOHuI7fkZYeNIcAoa83rBltFXaBDYhWAKS1\nPcXS1/7JzP0ky7d0L6Xbu/If5kqWQpKwUInXtySRkuraVfuK3Bpa+X1XecWi24JY\nHVtlNX025xx1ewVzGNCTlWn1skQN2OOoQTV4C8/qFpTW6DTWYurd4+fE0OJFJZQF\nbuhfXYwmRlVOgN5i77NTIJZJQfYFj38c/Iv5vZBPokO6mffrOTv3MHWVgQARAQAB\ntDNSZWQgSGF0LCBJbmMuIChyZWxlYXNlIGtleSAyKSA8c2VjdXJpdHlAcmVkaGF0\nLmNvbT6JAjYEEwECACAFAkrgSTsCGwMGCwkIBwMCBBUCCAMEFgIDAQIeAQIXgAAK\nCRAZni+R/UMdUWzpD/9s5SFR/ZF3yjY5VLUFLMXIKUztNN3oc45fyLdTI3+UClKC\n2tEruzYjqNHhqAEXa2sN1fMrsuKec61Ll2NfvJjkLKDvgVIh7kM7aslNYVOP6BTf\nC/JJ7/ufz3UZmyViH/WDl+AYdgk3JqCIO5w5ryrC9IyBzYv2m0HqYbWfphY3uHw5\nun3ndLJcu8+BGP5F+ONQEGl+DRH58Il9Jp3HwbRa7dvkPgEhfFR+1hI+Btta2C7E\n0/2NKzCxZw7Lx3PBRcU92YKyaEihfy/aQKZCAuyfKiMvsmzs+4poIX7I9NQCJpyE\nIGfINoZ7VxqHwRn/d5mw2MZTJjbzSf+Um9YJyA0iEEyD6qjriWQRbuxpQXmlAJbh\n8okZ4gbVFv1F8MzK+4R8VvWJ0XxgtikSo72fHjwha7MAjqFnOq6eo6fEC/75g3NL\nGht5VdpGuHk0vbdENHMC8wS99e5qXGNDued3hlTavDMlEAHl34q2H9nakTGRF5Ki\nJUfNh3DVRGhg8cMIti21njiRh7gyFI2OccATY7bBSr79JhuNwelHuxLrCFpY7V25\nOFktl15jZJaMxuQBqYdBgSay2G0U6D1+7VsWufpzd/Abx1/c3oi9ZaJvW22kAggq\ndzdA27UUYjWvx42w9menJwh/0jeQcTecIUd0d0rFcw/c1pvgMMl/Q73yzKgKYw==\n=zbHE\n-----END PGP PUBLIC KEY BLOCK-----\n-----BEGIN PGP PUBLIC KEY BLOCK-----\n\nmQINBGIpIp4BEAC/o5e1WzLIsS6/JOQCs4XYATYTcf6B6ALzcP05G0W3uRpUQSrL\nFRKNrU8ZCelm/B+XSh2ljJNeklp2WLxYENDOsftDXGoyLr2hEkI5OyK267IHhFNJ\ng+BN+T5Cjh4ZiiWij6o9F7x2ZpxISE9M4iI80rwSv1KOnGSw5j2zD2EwoMjTVyVE\n/t3s5XJxnDclB7ZqL+cgjv0mWUY/4+b/OoRTkhq7b8QILuZp75Y64pkrndgakm1T\n8mAGXV02mEzpNj9DyAJdUqa11PIhMJMxxHOGHJ8CcHZ2NJL2e7yJf4orTj+cMhP5\nLzJcVlaXnQYu8Zkqa0V6J1Qdj8ZXL72QsmyicRYXAtK9Jm5pvBHuYU2m6Ja7dBEB\nVkhe7lTKhAjkZC5ErPmANNS9kPdtXCOpwN1lOnmD2m04hks3kpH9OTX7RkTFUSws\neARAfRID6RLfi59B9lmAbekecnsMIFMx7qR7ZKyQb3GOuZwNYOaYFevuxusSwCHv\n4FtLDIhk+Fge+EbPdEva+VLJeMOb02gC4V/cX/oFoPkxM1A5LHjkuAM+aFLAiIRd\nNp/tAPWk1k6yc+FqkcDqOttbP4ciiXb9JPtmzTCbJD8lgH0rGp8ufyMXC9x7/dqX\nTjsiGzyvlMnrkKB4GL4DqRFl8LAR02A3846DD8CAcaxoXggL2bJCU2rgUQARAQAB\ntDVSZWQgSGF0LCBJbmMuIChhdXhpbGlhcnkga2V5IDMpIDxzZWN1cml0eUByZWRo\nYXQuY29tPokCUgQTAQgAPBYhBH5GJCWMQGU11W1vE1BU5KRaY0CzBQJiKSKeAhsD\nBQsJCAcCAyICAQYVCgkICwIEFgIDAQIeBwIXgAAKCRBQVOSkWmNAsyBfEACuTN/X\nYR+QyzeRw0pXcTvMqzNE4DKKr97hSQEwZH1/v1PEPs5O3psuVUm2iam7bqYwG+ry\nEskAgMHi8AJmY0lioQD5/LTSLTrM8UyQnU3g17DHau1NHIFTGyaW4a7xviU4C2+k\nc6X0u1CPHI1U4Q8prpNcfLsldaNYlsVZtUtYSHKPAUcswXWliW7QYjZ5tMSbu8jR\nOMOc3mZuf0fcVFNu8+XSpN7qLhRNcPv+FCNmk/wkaQfH4Pv+jVsOgHqkV3aLqJeN\nkNUnpyEKYkNqo7mNfNVWOcl+Z1KKKwSkIi3vg8maC7rODsy6IX+Y96M93sqYDQom\naaWue2gvw6thEoH4SaCrCL78mj2YFpeg1Oew4QwVcBnt68KOPfL9YyoOicNs4Vuu\nfb/vjU2ONPZAeepIKA8QxCETiryCcP43daqThvIgdbUIiWne3gae6eSj0EuUPoYe\nH5g2Lw0qdwbHIOxqp2kvN96Ii7s1DK3VyhMt/GSPCxRnDRJ8oQKJ2W/I1IT5VtiU\nzMjjq5JcYzRPzHDxfVzT9CLeU/0XQ+2OOUAiZKZ0dzSyyVn8xbpviT7iadvjlQX3\nCINaPB+d2Kxa6uFWh+ZYOLLAgZ9B8NKutUHpXN66YSfe79xFBSFWKkJ8cSIMk13/\nIfs7ApKlKCCRDpwoDqx/sjIaj1cpOfLHYjnefg==\n=UZd/\n-----END PGP PUBLIC KEY BLOCK-----\n"]
+id = "appstream"
+name = "appstream"
+rhsm = true
+system = true
+type = "yum-baseurl"
+url = "https://cdn.redhat.com/content/dist/rhel9/9.3/x86_64/appstream/os"
+```
+
+
+# baseos repo's Info
+```
+check_gpg = true
+check_repogpg = false
+check_ssl = true
+gpgkeys = ["-----BEGIN PGP PUBLIC KEY BLOCK-----\n\nmQINBErgSTsBEACh2A4b0O9t+vzC9VrVtL1AKvUWi9OPCjkvR7Xd8DtJxeeMZ5eF\n0HtzIG58qDRybwUe89FZprB1ffuUKzdE+HcL3FbNWSSOXVjZIersdXyH3NvnLLLF\n0DNRB2ix3bXG9Rh/RXpFsNxDp2CEMdUvbYCzE79K1EnUTVh1L0Of023FtPSZXX0c\nu7Pb5DI5lX5YeoXO6RoodrIGYJsVBQWnrWw4xNTconUfNPk0EGZtEnzvH2zyPoJh\nXGF+Ncu9XwbalnYde10OCvSWAZ5zTCpoLMTvQjWpbCdWXJzCm6G+/hx9upke546H\n5IjtYm4dTIVTnc3wvDiODgBKRzOl9rEOCIgOuGtDxRxcQkjrC+xvg5Vkqn7vBUyW\n9pHedOU+PoF3DGOM+dqv+eNKBvh9YF9ugFAQBkcG7viZgvGEMGGUpzNgN7XnS1gj\n/DPo9mZESOYnKceve2tIC87p2hqjrxOHuI7fkZYeNIcAoa83rBltFXaBDYhWAKS1\nPcXS1/7JzP0ky7d0L6Xbu/If5kqWQpKwUInXtySRkuraVfuK3Bpa+X1XecWi24JY\nHVtlNX025xx1ewVzGNCTlWn1skQN2OOoQTV4C8/qFpTW6DTWYurd4+fE0OJFJZQF\nbuhfXYwmRlVOgN5i77NTIJZJQfYFj38c/Iv5vZBPokO6mffrOTv3MHWVgQARAQAB\ntDNSZWQgSGF0LCBJbmMuIChyZWxlYXNlIGtleSAyKSA8c2VjdXJpdHlAcmVkaGF0\nLmNvbT6JAjYEEwECACAFAkrgSTsCGwMGCwkIBwMCBBUCCAMEFgIDAQIeAQIXgAAK\nCRAZni+R/UMdUWzpD/9s5SFR/ZF3yjY5VLUFLMXIKUztNN3oc45fyLdTI3+UClKC\n2tEruzYjqNHhqAEXa2sN1fMrsuKec61Ll2NfvJjkLKDvgVIh7kM7aslNYVOP6BTf\nC/JJ7/ufz3UZmyViH/WDl+AYdgk3JqCIO5w5ryrC9IyBzYv2m0HqYbWfphY3uHw5\nun3ndLJcu8+BGP5F+ONQEGl+DRH58Il9Jp3HwbRa7dvkPgEhfFR+1hI+Btta2C7E\n0/2NKzCxZw7Lx3PBRcU92YKyaEihfy/aQKZCAuyfKiMvsmzs+4poIX7I9NQCJpyE\nIGfINoZ7VxqHwRn/d5mw2MZTJjbzSf+Um9YJyA0iEEyD6qjriWQRbuxpQXmlAJbh\n8okZ4gbVFv1F8MzK+4R8VvWJ0XxgtikSo72fHjwha7MAjqFnOq6eo6fEC/75g3NL\nGht5VdpGuHk0vbdENHMC8wS99e5qXGNDued3hlTavDMlEAHl34q2H9nakTGRF5Ki\nJUfNh3DVRGhg8cMIti21njiRh7gyFI2OccATY7bBSr79JhuNwelHuxLrCFpY7V25\nOFktl15jZJaMxuQBqYdBgSay2G0U6D1+7VsWufpzd/Abx1/c3oi9ZaJvW22kAggq\ndzdA27UUYjWvx42w9menJwh/0jeQcTecIUd0d0rFcw/c1pvgMMl/Q73yzKgKYw==\n=zbHE\n-----END PGP PUBLIC KEY BLOCK-----\n-----BEGIN PGP PUBLIC KEY BLOCK-----\n\nmQINBGIpIp4BEAC/o5e1WzLIsS6/JOQCs4XYATYTcf6B6ALzcP05G0W3uRpUQSrL\nFRKNrU8ZCelm/B+XSh2ljJNeklp2WLxYENDOsftDXGoyLr2hEkI5OyK267IHhFNJ\ng+BN+T5Cjh4ZiiWij6o9F7x2ZpxISE9M4iI80rwSv1KOnGSw5j2zD2EwoMjTVyVE\n/t3s5XJxnDclB7ZqL+cgjv0mWUY/4+b/OoRTkhq7b8QILuZp75Y64pkrndgakm1T\n8mAGXV02mEzpNj9DyAJdUqa11PIhMJMxxHOGHJ8CcHZ2NJL2e7yJf4orTj+cMhP5\nLzJcVlaXnQYu8Zkqa0V6J1Qdj8ZXL72QsmyicRYXAtK9Jm5pvBHuYU2m6Ja7dBEB\nVkhe7lTKhAjkZC5ErPmANNS9kPdtXCOpwN1lOnmD2m04hks3kpH9OTX7RkTFUSws\neARAfRID6RLfi59B9lmAbekecnsMIFMx7qR7ZKyQb3GOuZwNYOaYFevuxusSwCHv\n4FtLDIhk+Fge+EbPdEva+VLJeMOb02gC4V/cX/oFoPkxM1A5LHjkuAM+aFLAiIRd\nNp/tAPWk1k6yc+FqkcDqOttbP4ciiXb9JPtmzTCbJD8lgH0rGp8ufyMXC9x7/dqX\nTjsiGzyvlMnrkKB4GL4DqRFl8LAR02A3846DD8CAcaxoXggL2bJCU2rgUQARAQAB\ntDVSZWQgSGF0LCBJbmMuIChhdXhpbGlhcnkga2V5IDMpIDxzZWN1cml0eUByZWRo\nYXQuY29tPokCUgQTAQgAPBYhBH5GJCWMQGU11W1vE1BU5KRaY0CzBQJiKSKeAhsD\nBQsJCAcCAyICAQYVCgkICwIEFgIDAQIeBwIXgAAKCRBQVOSkWmNAsyBfEACuTN/X\nYR+QyzeRw0pXcTvMqzNE4DKKr97hSQEwZH1/v1PEPs5O3psuVUm2iam7bqYwG+ry\nEskAgMHi8AJmY0lioQD5/LTSLTrM8UyQnU3g17DHau1NHIFTGyaW4a7xviU4C2+k\nc6X0u1CPHI1U4Q8prpNcfLsldaNYlsVZtUtYSHKPAUcswXWliW7QYjZ5tMSbu8jR\nOMOc3mZuf0fcVFNu8+XSpN7qLhRNcPv+FCNmk/wkaQfH4Pv+jVsOgHqkV3aLqJeN\nkNUnpyEKYkNqo7mNfNVWOcl+Z1KKKwSkIi3vg8maC7rODsy6IX+Y96M93sqYDQom\naaWue2gvw6thEoH4SaCrCL78mj2YFpeg1Oew4QwVcBnt68KOPfL9YyoOicNs4Vuu\nfb/vjU2ONPZAeepIKA8QxCETiryCcP43daqThvIgdbUIiWne3gae6eSj0EuUPoYe\nH5g2Lw0qdwbHIOxqp2kvN96Ii7s1DK3VyhMt/GSPCxRnDRJ8oQKJ2W/I1IT5VtiU\nzMjjq5JcYzRPzHDxfVzT9CLeU/0XQ+2OOUAiZKZ0dzSyyVn8xbpviT7iadvjlQX3\nCINaPB+d2Kxa6uFWh+ZYOLLAgZ9B8NKutUHpXN66YSfe79xFBSFWKkJ8cSIMk13/\nIfs7ApKlKCCRDpwoDqx/sjIaj1cpOfLHYjnefg==\n=UZd/\n-----END PGP PUBLIC KEY BLOCK-----\n"]
+id = "baseos"
+name = "baseos"
+rhsm = true
+system = true
+type = "yum-baseurl"
+url = "https://cdn.redhat.com/content/dist/rhel9/9.3/x86_64/baseos/os"
+```
+
+
+
+##############################################################
+### CUSTOM BLUEPRINT FILE ###
+
+# Create a custom blueprint file
+```
+name = "CUSTOM_RHEL8_BLUEPRINT"
+description = "RHEL8"
+version = "1.0.0"
+modules = []
+groups = []
+
+
+[[packages]]
+name = "vim-enhanced"
+version = "*"
+
+[[packages]]
+name = "tmux"
+version = "*"
+
+[[packages]]
+name = "firewalld"
+version = "*"
+
+
+[customizations.kernel]
+append = "fips=1 audit=1 ipv6.disable=1"
+```
+
+
+# Push our custom Blueprint file
+```
+composer-cli blueprints push custom_blueprint.toml
+```
+
+# List blueprint files
+```
+composer-cli blueprints list
+```
+
+# Show info about blueprint
+```
+composer-cli blueprints show CUSTOM_RHEL8_BLUEPRINT
+```
+
+# Check if dependency versions are valid
+```
+composer-cli blueprints depsolve CUSTOM_RHEL8_BLUEPRINT
+```
+##############################################################
+### BUILD THE BLUEPRINT ####
+
+# List the valid export types
+```
+composer-cli compose types
+```
+
+## Valid Image Type Choices:
+```
+ami
+edge-ami
+edge-commit
+edge-container
+edge-installer
+edge-raw-image
+edge-simplified-installer
+edge-vsphere
+gce
+image-installer
+minimal-raw
+oci
+openstack
+ova
+qcow2
+tar
+vhd
+vmdk
+wsl
+
+```
+
+
+# Choose one of the export types to export our blueprint to
+## Use qcow2 (.qcow2) or image-installer (.iso)
+```
+composer-cli compose start CUSTOM_RHEL8_BLUEPRINT qcow2
+```
+
+# Check the compose build status
+```
+composer-cli compose status 
+```
+
+
+# After the status changes to "FINISHED", get the build UUID to download the image file
+```
+composer-cli compose image <UUID>
+```
+
+# Also you can download the logs with:
+```
+composer-cli compose logs <UUID>
+```
+
+# Also you can download the metadata with:
+```
+composer-cli compose metadata <UUID>
+```
+
+
+# (HINT) ALL in One command:
+```
+# Get the UUID with `composer-cli compose status`
+
+##################################
+### CHANGE ME ###
+UUID='691ff420-a758-4e21-8e50-1335bb4ebab1'
+##################################
+
+cd /home/alpha/IMAGE_BUILDER/OUTPUT_IMAGES
+
+IMAGE_TYPE="$(composer-cli compose status | grep '2f1917dd-da39-40f1-b197-804fde7c8603' | awk '{print $(NF-1)}')"
+IMAGE_NAME="$(composer-cli compose status | grep '2f1917dd-da39-40f1-b197-804fde7c8603' | awk '{print $(NF-3)}')"
+IMAGE_VERSION="$(composer-cli compose status | grep '2f1917dd-da39-40f1-b197-804fde7c8603' | awk '{print $(NF-2)}')"
+
+composer-cli compose status | grep "${UUID}"
+composer-cli compose image "${UUID}"
+composer-cli compose logs "${UUID}"
+composer-cli compose metadata "${UUID}"
+
+mv "${UUID}-logs.tar" "${IMAGE_NAME}_${IMAGE_VERSION}_${UUID}-logs.tar"
+mv "${UUID}-metadata.tar" "${IMAGE_NAME}_${IMAGE_VERSION}_${UUID}-metadata.tar"
+
+if [ "${IMAGE_TYPE}" == "qcow2" ]; then
+mv "${UUID}-disk.qcow2" "${IMAGE_NAME}_${IMAGE_VERSION}_${UUID}-disk.qcow2"
+elif [ "${IMAGE_TYPE}" == "image-installer" ]; then
+mv "${UUID}-installer.iso" "${IMAGE_NAME}_${IMAGE_VERSION}_${UUID}-installer.iso"
+fi
+
+
+```
+
+
+##############################################################
+# PREREQUISITES:
+## 1) Build Host is Red Hat Enterprise Linux 8 or 9
+## 2) Package dependencies: weldr-client, osbuild-composer
+## 3) User must be added to the "weldr" group
+## 4) "osbuild-composer.socket" must be started
+
+
+export BLUEPRINT_FILE='/home/alpha/IMAGE_BUILDER/CUSTOM_BLUEPRINTS/CUSTOM_RHEL8_BLUEPRINT.toml'
+export BLUEPRINT_NAME='CUSTOM_RHEL8_BLUEPRINT'
+export IMAGE_OUTPUT_DIR='/virtual_machines/RHEL8'
+
+
+getent group weldr | grep "${USER}" || sudo usermod -aG weldr $USER
+systemctl is-active osbuild-composer.socket || sudo systemctl start osbuild-composer.socket
+
+composer-cli compose types || newgrp weldr;
+
+#############################################
+## Copy and Paste this afterwards
+
+composer-cli compose types;
+composer-cli blueprints push "${BLUEPRINT_FILE}"
+COMPOSE_UUID="$(composer-cli compose start "${BLUEPRINT_NAME}" qcow2 | awk '{print $2}')"
+echo "Compose ${COMPOSE_UUID} added to the queue"
+
+
+IMAGE_STATUS="$(composer-cli compose status | grep "${COMPOSE_UUID}" | awk -F '[[:space:]][[:space:]]+' '{print $2}')";
+IMAGE_NAME="$(composer-cli compose status | grep "${COMPOSE_UUID}" | awk -F '[[:space:]][[:space:]]+' '{print $4}')";
+IMAGE_VERSION="$(composer-cli compose status | grep "${COMPOSE_UUID}" | awk -F '[[:space:]][[:space:]]+' '{print $5}')";
+IMAGE_TYPE="$(composer-cli compose status | grep "${COMPOSE_UUID}" | awk -F '[[:space:]][[:space:]]+' '{print $6}')";
+echo "STATUS: ${IMAGE_STATUS}"
+echo "NAME: ${IMAGE_NAME}"
+echo "VERSION: ${IMAGE_VERSION}"
+echo "TYPE: ${IMAGE_TYPE}"
+
+while [ "${IMAGE_STATUS}" != 'FINISHED' ]; do
+sleep 5;
+IMAGE_STATUS="$(composer-cli compose status | grep "${COMPOSE_UUID}" | awk -F '[[:space:]][[:space:]]+' '{print $2}')";
+echo "Waiting for \"${IMAGE_NAME}__${IMAGE_VERSION}__${IMAGE_TYPE}\" (${COMPOSE_UUID}): ${IMAGE_STATUS}";
+done
+
+composer-cli compose status | grep "${COMPOSE_UUID}"
+echo "Saving logs to '${IMAGE_OUTPUT_DIR}/${IMAGE_NAME}_${IMAGE_VERSION}_${COMPOSE_UUID}-logs.tar' ...";
+composer-cli compose logs "${COMPOSE_UUID}";
+echo "Saving metadata to '${IMAGE_OUTPUT_DIR}/${IMAGE_NAME}_${IMAGE_VERSION}_${COMPOSE_UUID}-metadata.tar' ...";
+composer-cli compose metadata "${COMPOSE_UUID}";
+if [ "${IMAGE_TYPE}" == "qcow2" ]; then
+echo "Saving image to '${IMAGE_OUTPUT_DIR}/${IMAGE_NAME}_${IMAGE_VERSION}_${COMPOSE_UUID}-disk.qcow2' ..."
+elif [ "${IMAGE_TYPE}" == "image-installer" ]; then
+echo "Saving image to '${IMAGE_OUTPUT_DIR}/${IMAGE_NAME}_${IMAGE_VERSION}_${COMPOSE_UUID}-installer.iso' ..."
+fi
+composer-cli compose image "${COMPOSE_UUID}";
+
+
+
+sudo mv -Z "${COMPOSE_UUID}-logs.tar" "${IMAGE_OUTPUT_DIR}/${IMAGE_NAME}_${IMAGE_VERSION}_${COMPOSE_UUID}-logs.tar"
+
+sudo mv -Z "${COMPOSE_UUID}-metadata.tar" "${IMAGE_OUTPUT_DIR}/${IMAGE_NAME}_${IMAGE_VERSION}_${COMPOSE_UUID}-metadata.tar"
+
+if [ "${IMAGE_TYPE}" == "qcow2" ]; then
+sudo mv -Z "${COMPOSE_UUID}-disk.qcow2" "${IMAGE_OUTPUT_DIR}/${IMAGE_NAME}_${IMAGE_VERSION}_${COMPOSE_UUID}-disk.qcow2"
+chmod 0660 "${IMAGE_OUTPUT_DIR}/${IMAGE_NAME}_${IMAGE_VERSION}_${COMPOSE_UUID}-disk.qcow2"
+chgrp kvm "${IMAGE_OUTPUT_DIR}/${IMAGE_NAME}_${IMAGE_VERSION}_${COMPOSE_UUID}-disk.qcow2"
+elif [ "${IMAGE_TYPE}" == "image-installer" ]; then
+sudo mv -Z "${COMPOSE_UUID}-installer.iso" "${IMAGE_OUTPUT_DIR}/${IMAGE_NAME}_${IMAGE_VERSION}_${COMPOSE_UUID}-installer.iso"
+fi
+
+
+
+#############################################
+
+
+
+##############################################################
+
+
+virt-edit -a CUSTOM_RHEL8_IMAGE_5ddaa011-e6c3-4931-8456-732cf32c20a5-disk.qcow2 /boot/grub2/grubenv
+
+

@@ -1,0 +1,2 @@
+cp /virtual_machines/RHEL8/ORIGINAL/rhel-8.9-x86_64-kvm.ORIGINAL.qcow2 /virtual_machines/RHEL8/R8K01.home.arpa.qcow;
+virt-customize --add /virtual_machines/RHEL8/R8K01.home.arpa.qcow2 --smp 4 --timezone America/New_York --password-crypto sha512 --root-password password  --hostname R8K01.home.arpa --sm-register --sm-credentials "$(cat /home/alpha/virt_passwords/subscription_manager_user.txt):file:/home/alpha/virt_passwords/subscription_manager_password.txt" --install vim --install tmux --update --sm-unregister;
